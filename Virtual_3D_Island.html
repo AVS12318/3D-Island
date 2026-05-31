@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Eco-Island Model with Waves</title>
+    <title>Virtual 3D Island</title>
     <style>
         body {
             margin: 0;
@@ -53,7 +53,7 @@
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
-        controls.maxPolarAngle = Math.PI / 2 - 0.05; // Don't go below ground
+        controls.maxPolarAngle = Math.PI / 2 - 0.05;
 
         // --- 2. LIGHTS ---
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
@@ -73,14 +73,13 @@
         sunLight.shadow.camera.bottom = -d;
         scene.add(sunLight);
 
-        // --- 3. ENVIRONMENT (ANIMATED SEA & ISLAND) ---
-        // Sea Geometry segmented into vertices to allow for wave deformation
+        // --- 3. ENVIRONMENT---
         const seaGeo = new THREE.PlaneGeometry(250, 250, 60, 60);
         const seaMat = new THREE.MeshStandardMaterial({ 
             color: 0x006699, 
             roughness: 0.15, 
             metalness: 0.1,
-            flatShading: true // Gives waves a nice stylized low-poly look
+            flatShading: true 
         });
         const sea = new THREE.Mesh(seaGeo, seaMat);
         sea.rotation.x = -Math.PI / 2;
@@ -363,17 +362,12 @@
             const posAttr = seaGeo.attributes.position;
             for (let i = 0; i < posAttr.count; i++) {
                 const x = posAttr.getX(i);
-                const y = posAttr.getY(i); // Note: PlaneGeometry default uses Y for height mapping before rotation
-
-                // Combine multiple sine/cosine waves to mimic natural ocean surface turbulence
+                const y = posAttr.getY(i);
                 const wave1 = Math.sin(x * 0.1 + elapsed * 1.2) * 0.25;
                 const wave2 = Math.cos(y * 0.08 + elapsed * 1.0) * 0.25;
                 const wave3 = Math.sin((x + y) * 0.05 + elapsed * 0.5) * 0.15;
-
-                // Update vertex height (Z axis in PlaneGeometry coordinate frame)
                 posAttr.setZ(i, initialZ[i] + wave1 + wave2 + wave3);
             }
-            // Alert Three.js that vertices have shifted to update the frame
             posAttr.needsUpdate = true;
             seaGeo.computeVertexNormals(); 
 
